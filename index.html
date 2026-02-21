@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Birthday 💕</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Quicksand:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Quicksand", sans-serif;
+        background: linear-gradient(135deg, #ffd6e8, #ffe5d9);
+        overflow: hidden;
+        color: #444;
+      }
+
+      .page {
+        display: none;
+        height: 100vh;
+        width: 100vw;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+        padding: 20px;
+        position: absolute;
+      }
+      .active {
+        display: flex;
+      }
+
+      h1 {
+        font-family: "Playfair Display", serif;
+        font-size: 34px;
+        color: #ff4f9a;
+        margin-bottom: 20px;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(15px);
+        padding: 30px;
+        border-radius: 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      button {
+        padding: 12px 28px;
+        border: none;
+        border-radius: 30px;
+        background: #ff4f9a;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: 0.3s;
+      }
+      button:hover {
+        transform: scale(1.05);
+      }
+
+      .keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 70px);
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+      }
+      .key {
+        background: white;
+        border-radius: 50%;
+        height: 70px;
+        width: 70px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: 0.2s;
+      }
+      .key:hover {
+        transform: scale(1.1);
+      }
+
+      .pin-display {
+        letter-spacing: 10px;
+        font-size: 28px;
+        margin-top: 10px;
+      }
+
+      /* GAME */
+      #gameArea {
+        position: relative;
+        width: 100%;
+        height: 60vh;
+        overflow: hidden;
+      }
+
+      .heart {
+        position: absolute;
+        font-size: 30px;
+        cursor: pointer;
+        animation: drop 3s linear forwards;
+      }
+      @keyframes drop {
+        from {
+          top: -10%;
+        }
+        to {
+          top: 110%;
+        }
+      }
+
+      /* WIN POPUP */
+      #winPopup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+      }
+      .win-box {
+        background: white;
+        padding: 40px;
+        border-radius: 25px;
+        text-align: center;
+        animation: pop 0.4s ease;
+      }
+      @keyframes pop {
+        from {
+          transform: scale(0.5);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      /* LETTER */
+      #letter {
+        white-space: pre-line;
+        max-width: 600px;
+        font-size: 16px;
+        margin-top: 15px;
+      }
+
+      /* SLIDE */
+      .slide {
+        display: none;
+      }
+      .slide img {
+        width: 260px;
+        height: 360px;
+        object-fit: cover;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+
+      .music-card {
+        background: white;
+        border-radius: 20px;
+        padding: 10px;
+        margin: 10px;
+        width: 320px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 26px;
+        }
+        .slide img {
+          width: 200px;
+          height: 280px;
+        }
+        .music-card {
+          width: 95%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- LOADING -->
+    <div class="page active" id="loading">
+      <div class="card">
+        <h1 id="loadingText"></h1>
+      </div>
+    </div>
+
+    <!-- PIN -->
+    <div class="page" id="pinPage">
+      <div class="card">
+        <h1>Enter PIN 💗</h1>
+        <div class="pin-display" id="pinDisplay">______</div>
+        <div class="keypad">
+          <div class="key">1</div>
+          <div class="key">2</div>
+          <div class="key">3</div>
+          <div class="key">4</div>
+          <div class="key">5</div>
+          <div class="key">6</div>
+          <div class="key">7</div>
+          <div class="key">8</div>
+          <div class="key">9</div>
+          <div></div>
+          <div class="key">0</div>
+          <div></div>
+        </div>
+        <p id="pinMessage"></p>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div class="page" id="gamePage">
+      <div class="card">
+        <h1>Catch 5 Hearts 💕</h1>
+        <p>Score: <span id="score">0</span> / 5</p>
+        <div id="gameArea"></div>
+      </div>
+    </div>
+
+    <!-- WIN POPUP -->
+    <div id="winPopup">
+      <div class="win-box">
+        <h1>You Win 💕</h1>
+        <p>You caught my heart again 🥺💗</p>
+        <button onclick="goBirthday()">Open Your Surprise 🎁</button>
+      </div>
+    </div>
+
+    <!-- BIRTHDAY -->
+    <div class="page" id="birthdayPage">
+      <div class="card">
+        <h1>Happy Birthday My Love 🥺💖</h1>
+        <div id="letter"></div>
+        <button onclick="nextPage('memoryPage')">Next 💗</button>
+      </div>
+    </div>
+
+    <!-- MEMORY -->
+    <div class="page" id="memoryPage">
+      <div class="card">
+        <h1>Our Memory 🥰✨</h1>
+        <div class="slide">
+          <img
+            src="https://i.pinimg.com/736x/51/bf/74/51bf74803569ce1fbf9d5a8f268b624e.jpg"
+          />
+        </div>
+        <div class="slide">
+          <img
+            src="https://i.pinimg.com/736x/58/60/fa/5860fa399fab0cfcb5a47521c22291ec.jpg"
+          />
+        </div>
+        <div class="slide">
+          <img
+            src="https://i.pinimg.com/736x/e1/58/e9/e158e901e57bda604b63367bf24b00e0.jpg"
+          />
+        </div>
+        <div class="slide">
+          <img
+            src="https://i.pinimg.com/736x/fb/50/43/fb5043fc71c673ce62c8aa252e156e9f.jpg"
+          />
+        </div>
+        <button onclick="nextPage('musicPage')">Next 💗</button>
+      </div>
+    </div>
+
+    <!-- MUSIC -->
+    <div class="page" id="musicPage">
+      <div class="card">
+        <h1>Music For U 🎶</h1>
+        <div class="music-card">
+          <iframe
+            src="https://open.spotify.com/embed/track/6tIoXcKI2qpMsXCdFP3Gi0?utm_source=generator"
+            width="100%"
+            height="80"
+          ></iframe>
+        </div>
+        <div class="music-card">
+          <iframe
+            src="https://open.spotify.com/embed/track/5XeFesFbtLpXzIVDNQP22n?utm_source=generator"
+            width="100%"
+            height="80"
+          ></iframe>
+        </div>
+        <div class="music-card">
+          <iframe
+            src="https://open.spotify.com/embed/track/3vkCueOmm7xQDoJ17W1Pm3?utm_source=generator"
+            width="100%"
+            height="80"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* PAGE SWITCH */
+      function nextPage(id) {
+        document
+          .querySelectorAll(".page")
+          .forEach((p) => p.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+      /* LOADING */
+      let text = "Preparing something sweet for you 🥰💌";
+      let i = 0;
+      function typeLoad() {
+        if (i < text.length) {
+          document.getElementById("loadingText").innerHTML += text[i];
+          i++;
+          setTimeout(typeLoad, 50);
+        } else {
+          setTimeout(() => nextPage("pinPage"), 1200);
+        }
+      }
+      typeLoad();
+
+      /* PIN */
+      let input = "";
+      document.querySelectorAll(".key").forEach((key) => {
+        key.addEventListener("click", () => {
+          if (input.length < 6) {
+            input += key.innerText;
+            document.getElementById("pinDisplay").innerText = input.replace(
+              /./g,
+              "*",
+            );
+            if (input.length == 6) {
+              if (input === "000000") {
+                setTimeout(() => startGame(), 400);
+              } else {
+                document.getElementById("pinMessage").innerText =
+                  "Wrong PIN 🥺";
+                input = "";
+                document.getElementById("pinDisplay").innerText = "____";
+              }
+            }
+          }
+        });
+      });
+
+      /* GAME */
+      let score = 0;
+      let target = 5;
+      function startGame() {
+        nextPage("gamePage");
+        score = 0;
+        document.getElementById("score").innerText = score;
+        spawnHearts();
+      }
+
+      function spawnHearts() {
+        let gameArea = document.getElementById("gameArea");
+        let spawn = setInterval(() => {
+          if (
+            !document.getElementById("gamePage").classList.contains("active")
+          ) {
+            clearInterval(spawn);
+            return;
+          }
+          let heart = document.createElement("div");
+          heart.classList.add("heart");
+          heart.innerHTML = "💗";
+          heart.style.left = Math.random() * 90 + "%";
+          heart.onclick = function () {
+            score++;
+            document.getElementById("score").innerText = score;
+            heart.remove();
+            if (score >= target) {
+              clearInterval(spawn);
+              document.getElementById("winPopup").style.display = "flex";
+            }
+          };
+          gameArea.appendChild(heart);
+          setTimeout(() => heart.remove(), 3000);
+        }, 700);
+      }
+
+      function goBirthday() {
+        document.getElementById("winPopup").style.display = "none";
+        nextPage("birthdayPage");
+        startLetter();
+      }
+
+      /* LETTER */
+      let letterText = `Hai cintaku 💕
+
+Hari ini dunia jadi lebih indah karena kamu lahir.
+Terima kasih sudah hadir di hidup aku.
+
+Aku bangga sama kamu.
+Aku sayang kamu.
+Dan aku selalu doakan yang terbaik buat kamu.
+
+Happy birthday my sweetest human 💗`;
+      let j = 0;
+      function startLetter() {
+        j = 0;
+        let area = document.getElementById("letter");
+        area.innerHTML = "";
+        function type() {
+          if (j < letterText.length) {
+            area.innerHTML += letterText[j];
+            j++;
+            setTimeout(type, 35);
+          }
+        }
+        type();
+      }
+
+      /* SLIDE */
+      let slideIndex = 0;
+      function showSlides() {
+        let slides = document.querySelectorAll(".slide");
+        slides.forEach((s) => (s.style.display = "none"));
+        slideIndex++;
+        if (slideIndex > slides.length) slideIndex = 1;
+        slides[slideIndex - 1].style.display = "block";
+        setTimeout(showSlides, 2500);
+      }
+      showSlides();
+    </script>
+  </body>
+</html>
